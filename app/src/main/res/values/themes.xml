@@ -11,14 +11,5 @@
         <item name="android:navigationBarColor">@color/surface</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar">false</item>
-        <item name="bottomNavigationStyle">@style/BottomNavStyle</item>
-    </style>
-
-    <style name="BottomNavStyle" parent="Widget.MaterialComponents.BottomNavigationView">
-        <item name="android:background">@color/surface</item>
-        <item name="itemIconTint">@color/nav_item_color</item>
-        <item name="itemTextColor">@color/nav_item_color</item>
-        <item name="itemActiveIndicatorColor">@color/nav_indicator</item>
-        <item name="elevation">8dp</item>
     </style>
 </resources>
