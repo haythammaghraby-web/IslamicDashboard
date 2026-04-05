@@ -1,132 +1,111 @@
 package com.islamic.dashboard
 
-import android.annotation.SuppressLint
+import android.app.PendingIntent
+import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetProvider
 import android.content.Context
-import android.content.SharedPreferences
-import android.os.Bundle
-import android.view.View
-import android.webkit.GeolocationPermissions
-import android.webkit.JavascriptInterface
-import android.webkit.WebChromeClient
-import android.webkit.WebSettings
-import android.webkit.WebView
-import android.webkit.WebViewClient
-import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.islamic.dashboard.databinding.ActivityMainBinding
+import android.content.Intent
+import android.widget.RemoteViews
+import java.util.Calendar
+import java.util.Date
 
-class MainActivity : AppCompatActivity() {
-
-    private lateinit var binding: ActivityMainBinding
-    private lateinit var prefs: SharedPreferences
-    private val tabs = listOf("home", "prayer", "cosmos", "events", "converter")
-    private val webViews = mutableMapOf<String, WebView>()
-    private var currentTab = "home"
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        prefs = getSharedPreferences("islamic_app", Context.MODE_PRIVATE)
-        initWebViews()
-        setupBottomNav()
-        showTab("home")
-    }
-
-    @SuppressLint("SetJavaScriptEnabled")
-    private fun initWebViews() {
-        val container = binding.webViewContainer
-        tabs.forEach { tab ->
-            val wv = WebView(this).apply {
-                layoutParams = android.view.ViewGroup.LayoutParams(
-                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                    android.view.ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                visibility = View.GONE
-                settings.apply {
-                    javaScriptEnabled = true
-                    domStorageEnabled = true
-                    allowFileAccess = true
-                    mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-                    useWideViewPort = true
-                    loadWithOverviewMode = true
-                    setSupportZoom(false)
-                    setGeolocationEnabled(true)
-                }
-                webChromeClient = object : WebChromeClient() {
-                    override fun onGeolocationPermissionsShowPrompt(
-                        origin: String,
-                        callback: GeolocationPermissions.Callback
-                    ) {
-                        callback.invoke(origin, true, false)
-                    }
-                }
-                webViewClient = WebViewClient()
-                addJavascriptInterface(AndroidBridge(this@MainActivity, prefs), "Android")
-            }
-            container.addView(wv)
-            webViews[tab] = wv
-            wv.loadUrl("file:///android_asset/$tab.html")
-        }
-    }
-
-    private fun setupBottomNav() {
-        binding.bottomNav.setOnItemSelectedListener { item ->
-            val tab = when (item.itemId) {
-                R.id.nav_home -> "home"
-                R.id.nav_prayer -> "prayer"
-                R.id.nav_cosmos -> "cosmos"
-                R.id.nav_events -> "events"
-                R.id.nav_converter -> "converter"
-                else -> "home"
-            }
-            showTab(tab)
-            true
-        }
-    }
-
-    private fun showTab(tab: String) {
-        currentTab = tab
-        webViews.forEach { (key, wv) ->
-            wv.visibility = if (key == tab) View.VISIBLE else View.GONE
-        }
-    }
-
-    override fun onBackPressed() {
-        val wv = webViews[currentTab]
-        if (wv?.canGoBack() == true) {
-            wv.goBack()
-        } else {
-            super.onBackPressed()
-        }
+class IslamicWidgetSmall : AppWidgetProvider() {
+    override fun onUpdate(ctx: Context, mgr: AppWidgetManager, ids: IntArray) {
+        ids.forEach { updateSmallWidget(ctx, mgr, it) }
     }
 }
 
-class AndroidBridge(
-    private val context: Context,
-    private val prefs: SharedPreferences
-) {
-    @JavascriptInterface
-    fun saveLocation(lat: Double, lon: Double, city: String, method: String) {
-        prefs.edit()
-            .putFloat("lat", lat.toFloat())
-            .putFloat("lon", lon.toFloat())
-            .putString("city", city)
-            .putString("method", method)
-            .apply()
+class IslamicWidgetMedium : AppWidgetProvider() {
+    override fun onUpdate(ctx: Context, mgr: AppWidgetManager, ids: IntArray) {
+        ids.forEach { updateMediumWidget(ctx, mgr, it) }
     }
+}
 
-    @JavascriptInterface
-    fun getLocationData(): String {
-        val lat = prefs.getFloat("lat", 21.3891f).toDouble()
-        val lon = prefs.getFloat("lon", 39.8579f).toDouble()
-        val city = prefs.getString("city", "جدة") ?: "جدة"
-        val method = prefs.getString("method", "4") ?: "4"
-        return """{"lat":$lat,"lon":$lon,"city":"$city","method":"$method"}"""
+class IslamicWidgetLarge : AppWidgetProvider() {
+    override fun onUpdate(ctx: Context, mgr: AppWidgetManager, ids: IntArray) {
+        ids.forEach { updateLargeWidget(ctx, mgr, it) }
     }
+}
 
-    @JavascriptInterface
-    fun showToast(msg: String) {
-        android.widget.Toast.makeText(context, msg, android.widget.Toast.LENGTH_SHORT).show()
+const val ACTION_UPDATE_WIDGET = "com.islamic.dashboard.UPDATE_WIDGET"
+
+private val HIJRI_MONTHS = listOf(
+    "محرم","صفر","ربيع الأول","ربيع الآخر","جمادى الأولى","جمادى الآخرة",
+    "رجب","شعبان","رمضان","شوال","ذو القعدة","ذو الحجة"
+)
+
+private fun getTimeString(): String {
+    val now = Calendar.getInstance()
+    var h = now.get(Calendar.HOUR_OF_DAY)
+    val m = now.get(Calendar.MINUTE)
+    if (h > 12) h -= 12
+    if (h == 0) h = 12
+    return "%02d:%02d".format(h, m)
+}
+
+private fun getHijriDate(): String {
+    val ts = Date().time
+    val jd = (ts / 86400000 + 2440587.5).toLong()
+    var l = jd - 1948440 + 10632
+    val n = (l - 1) / 10631
+    l = l - 10631 * n + 354
+    val j = ((10985 - l) / 5316) * ((50 * l) / 17719) +
+            (l / 5670) * ((43 * l) / 15238)
+    l = l - ((30 - j) / 15) * ((17719 * j) / 50) -
+            (j / 16) * ((15238 * j) / 43) + 29
+    val month = ((24 * l) / 709).toInt()
+    val day = (l - (709 * month) / 24).toInt()
+    val year = (30 * n + j - 30).toInt()
+    val mName = HIJRI_MONTHS.getOrElse(month - 1) { "" }
+    return "$day $mName $year هـ"
+}
+
+private fun getMoonPhase(): String {
+    val now = Date()
+    @Suppress("DEPRECATION")
+    val knownNew = Date(124, 0, 11)
+    val diff = (now.time - knownNew.time) / (1000.0 * 60 * 60 * 24)
+    val cycle = 29.53059
+    val pct = ((diff % cycle) + cycle) % cycle / cycle
+    return when {
+        pct < 0.03 || pct > 0.97 -> "🌑 المحاق"
+        pct < 0.25 -> "🌒 الهلال"
+        pct < 0.28 -> "🌓 التربيع الأول"
+        pct < 0.47 -> "🌔 الأحدب المتزايد"
+        pct < 0.53 -> "🌕 البدر"
+        pct < 0.72 -> "🌖 الأحدب المتناقص"
+        pct < 0.78 -> "🌗 التربيع الأخير"
+        else -> "🌘 الهلال الأخير"
     }
+}
+
+private fun getLaunchIntent(ctx: Context, reqCode: Int): PendingIntent {
+    val i = Intent(ctx, MainActivity::class.java)
+    return PendingIntent.getActivity(ctx, reqCode, i, PendingIntent.FLAG_IMMUTABLE)
+}
+
+fun updateSmallWidget(ctx: Context, mgr: AppWidgetManager, id: Int) {
+    val v = RemoteViews(ctx.packageName, R.layout.widget_small)
+    v.setTextViewText(R.id.widget_small_time, getTimeString())
+    v.setTextViewText(R.id.widget_small_hijri, getHijriDate())
+    v.setOnClickPendingIntent(R.id.widget_small_time, getLaunchIntent(ctx, 0))
+    mgr.updateAppWidget(id, v)
+}
+
+fun updateMediumWidget(ctx: Context, mgr: AppWidgetManager, id: Int) {
+    val v = RemoteViews(ctx.packageName, R.layout.widget_medium)
+    v.setTextViewText(R.id.widget_med_time, getTimeString())
+    v.setTextViewText(R.id.widget_med_hijri, getHijriDate())
+    v.setTextViewText(R.id.widget_med_moon, getMoonPhase())
+    v.setOnClickPendingIntent(R.id.widget_med_time, getLaunchIntent(ctx, 1))
+    mgr.updateAppWidget(id, v)
+}
+
+fun updateLargeWidget(ctx: Context, mgr: AppWidgetManager, id: Int) {
+    val v = RemoteViews(ctx.packageName, R.layout.widget_large)
+    v.setTextViewText(R.id.widget_lg_time, getTimeString())
+    v.setTextViewText(R.id.widget_lg_hijri, getHijriDate())
+    v.setTextViewText(R.id.widget_lg_moon_phase, getMoonPhase())
+    v.setOnClickPendingIntent(R.id.widget_lg_time, getLaunchIntent(ctx, 2))
+    mgr.updateAppWidget(id, v)
 }
