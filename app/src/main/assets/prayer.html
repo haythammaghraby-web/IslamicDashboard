@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>مواقيت الصلاة</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--surface2:#1a2235;--border:rgba(180,150,80,0.2);--gold:#c9a227;--gold-light:#f0d060;--gold-dim:rgba(201,162,39,0.15);--teal:#4ecdc4;--text:#e8dcc8;--text-dim:#8a8070;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min-height:100vh;padding:16px;padding-bottom:80px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:18px;margin-bottom:12px;}
+.sec-title{font-family:'Amiri',serif;font-size:20px;color:var(--gold);text-align:center;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.sec-title::before,.sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.prayer-list{display:flex;flex-direction:column;gap:8px;}
+.p-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-radius:14px;background:var(--surface2);border:1px solid transparent;transition:all 0.3s;}
+.p-row.active{border-color:var(--gold);background:var(--gold-dim);box-shadow:0 0 20px rgba(201,162,39,0.1);}
+.p-name{font-family:'Amiri',serif;font-size:20px;}
+.p-row.active .p-name{color:var(--gold-light);}
+.p-right{display:flex;align-items:center;gap:10px;}
+.p-time{font-size:16px;color:var(--text-dim);direction:ltr;font-weight:500;}
+.p-row.active .p-time{color:var(--gold);font-weight:700;}
+.next-badge{font-size:9px;background:var(--gold);color:#0a0f1a;padding:3px 8px;border-radius:6px;font-weight:800;}
+.past{opacity:0.38;}
+/* Countdown */
+.countdown-card{background:linear-gradient(135deg,#1a2235,#0f1a2e);border:1px solid var(--border);border-radius:20px;padding:20px;text-align:center;margin-bottom:12px;}
+.cd-label{font-size:12px;color:var(--text-dim);margin-bottom:6px;letter-spacing:1px;}
+.cd-time{font-family:'Amiri',serif;font-size:42px;color:var(--gold-light);text-shadow:0 0 20px rgba(201,162,39,0.3);}
+.cd-next{font-size:14px;color:var(--text-dim);margin-top:4px;}
+/* Qibla */
+.qibla-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:18px;margin-bottom:12px;text-align:center;}
+.qibla-compass{width:140px;height:140px;margin:0 auto 10px;position:relative;}
+#qiblaCanvas{display:block;}
+.qibla-deg{font-family:'Amiri',serif;font-size:22px;color:var(--gold);margin-top:6px;}
+.qibla-desc{font-size:12px;color:var(--text-dim);}
+</style>
+</head>
+<body>
+
+<!-- Countdown -->
+<div class="countdown-card">
+  <div class="cd-label">الوقت المتبقي حتى الصلاة القادمة</div>
+  <div class="cd-time" id="countdown">--:--:--</div>
+  <div class="cd-next" id="nextPrayerName">جارٍ التحميل...</div>
+</div>
+
+<!-- Prayer times -->
+<div class="card">
+  <div class="sec-title">مواقيت الصلاة</div>
+  <div class="prayer-list" id="prayerList">
+    <div style="color:var(--text-dim);text-align:center;padding:20px;animation:pulse 2s infinite;">جارٍ تحميل المواقيت...</div>
+  </div>
+</div>
+
+<!-- Qibla -->
+<div class="qibla-card">
+  <div class="sec-title">اتجاه القبلة</div>
+  <div class="qibla-compass">
+    <canvas id="qiblaCanvas" width="140" height="140"></canvas>
+  </div>
+  <div class="qibla-deg" id="qiblaDeg">--°</div>
+  <div class="qibla-desc" id="qiblaDesc">من موقعك نحو الكعبة المشرفة</div>
+</div>
+
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}</style>
+
+<script>
+const prayerNames={Fajr:'الفجر',Sunrise:'الشروق',Dhuhr:'الظهر',Asr:'العصر',Maghrib:'المغرب',Isha:'العشاء'};
+const prayerIcons={Fajr:'🌙',Sunrise:'🌅',Dhuhr:'☀️',Asr:'🌤',Maghrib:'🌇',Isha:'⭐'};
+let timings={}, nextPrayer=null, nextMin=0;
+
+function loadPrayers(lat,lon,method){
+  if(!lat||!lon)return;
+  const n=new Date();
+  fetch(`https://api.aladhan.com/v1/timings/${n.getDate()}-${n.getMonth()+1}-${n.getFullYear()}?latitude=${lat}&longitude=${lon}&method=${method||4}`)
+    .then(r=>r.json()).then(d=>{timings=d.data.timings;renderPrayers();computeQibla(lat,lon);})
+    .catch(()=>{});
+}
+
+function renderPrayers(){
+  const prayers=['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'];
+  const now=new Date(),nowM=now.getHours()*60+now.getMinutes();
+  const mins=prayers.map(p=>{const[h,m]=timings[p].split(':').map(Number);return h*60+m;});
+  let nextIdx=mins.findIndex(m=>m>nowM);
+  if(nextIdx===-1)nextIdx=0;
+  nextPrayer=prayers[nextIdx];nextMin=mins[nextIdx];
+  let html='';
+  prayers.forEach((p,i)=>{
+    const isNext=i===nextIdx;
+    const isPast=mins[i]<nowM&&!(nextIdx===0&&i>0);
+    html+=`<div class="p-row${isNext?' active':''}${isPast?' past':''}">
+      <span class="p-name">${prayerIcons[p]} ${prayerNames[p]}</span>
+      <div class="p-right">
+        ${isNext?'<span class="next-badge">التالية</span>':''}
+        <span class="p-time">${timings[p]}</span>
+      </div>
+    </div>`;
+  });
+  document.getElementById('prayerList').innerHTML=html;
+}
+
+// Countdown
+function updateCountdown(){
+  if(!nextPrayer)return;
+  const now=new Date(),nowM=now.getHours()*60+now.getMinutes();
+  let diff=nextMin-nowM;if(diff<0)diff+=1440;
+  const h=Math.floor(diff/60),m=diff%60,s=60-now.getSeconds();
+  document.getElementById('countdown').textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s===60?0:s).padStart(2,'0')}`;
+  document.getElementById('nextPrayerName').textContent=`حتى ${prayerNames[nextPrayer]||'...'}`;
+}
+setInterval(updateCountdown,1000);
+
+// Qibla direction
+function computeQibla(lat,lon){
+  const MECCA_LAT=21.4225*Math.PI/180,MECCA_LON=39.8262*Math.PI/180;
+  const φ=lat*Math.PI/180,λ=lon*Math.PI/180;
+  const dλ=MECCA_LON-λ;
+  const y=Math.sin(dλ)*Math.cos(MECCA_LAT);
+  const x=Math.cos(φ)*Math.sin(MECCA_LAT)-Math.sin(φ)*Math.cos(MECCA_LAT)*Math.cos(dλ);
+  let bearing=(Math.atan2(y,x)*180/Math.PI+360)%360;
+  document.getElementById('qiblaDeg').textContent=`${Math.round(bearing)}°`;
+  drawCompass(bearing);
+}
+
+function drawCompass(bearing){
+  const cvs=document.getElementById('qiblaCanvas'),mc=cvs.getContext('2d');
+  const W=140,H=140,cx=70,cy=70,R=62;
+  mc.clearRect(0,0,W,H);
+  // Outer ring
+  mc.beginPath();mc.arc(cx,cy,R,0,Math.PI*2);mc.fillStyle='#1a2235';mc.fill();mc.strokeStyle='rgba(201,162,39,0.4)';mc.lineWidth=2;mc.stroke();
+  // Inner ring
+  mc.beginPath();mc.arc(cx,cy,R-6,0,Math.PI*2);mc.strokeStyle='rgba(201,162,39,0.12)';mc.lineWidth=1;mc.stroke();
+  // Cardinal directions
+  const dirs=[['ش',0],['ق',90],['ج',180],['غ',270]];
+  dirs.forEach(([l,a])=>{
+    const rad=(a-90)*Math.PI/180;
+    const tx=cx+Math.cos(rad)*(R-16),ty=cy+Math.sin(rad)*(R-16);
+    mc.fillStyle=a===0?'#e05c5c':'rgba(200,180,120,0.7)';
+    mc.font='bold 11px Tajawal';mc.textAlign='center';mc.textBaseline='middle';mc.fillText(l,tx,ty);
+  });
+  // Tick marks
+  for(let i=0;i<36;i++){
+    const rad=(i*10-90)*Math.PI/180;
+    const len=i%9===0?8:4;
+    mc.beginPath();mc.moveTo(cx+Math.cos(rad)*(R-18),cy+Math.sin(rad)*(R-18));mc.lineTo(cx+Math.cos(rad)*(R-18-len),cy+Math.sin(rad)*(R-18-len));mc.strokeStyle='rgba(180,150,80,0.3)';mc.lineWidth=1;mc.stroke();
+  }
+  // Qibla needle (gold)
+  const qRad=(bearing-90)*Math.PI/180;
+  mc.save();mc.translate(cx,cy);mc.rotate(qRad);
+  mc.beginPath();mc.moveTo(0,-42);mc.lineTo(5,0);mc.lineTo(0,42);mc.lineTo(-5,0);mc.closePath();
+  mc.fillStyle='rgba(201,162,39,0.15)';mc.fill();
+  mc.beginPath();mc.moveTo(0,-42);mc.lineTo(4,-5);mc.lineTo(0,0);mc.lineTo(-4,-5);mc.closePath();mc.fillStyle='#c9a227';mc.fill();
+  mc.beginPath();mc.moveTo(0,42);mc.lineTo(4,5);mc.lineTo(0,0);mc.lineTo(-4,5);mc.closePath();mc.fillStyle='#1a2235';mc.fill();
+  mc.restore();
+  // Center dot
+  mc.beginPath();mc.arc(cx,cy,5,0,Math.PI*2);mc.fillStyle='#f0d060';mc.fill();
+  // Kaaba icon hint
+  mc.font='14px Arial';mc.textAlign='center';mc.textBaseline='middle';
+  const kx=cx+Math.cos(qRad)*32,ky=cy+Math.sin(qRad)*32;
+  mc.fillText('🕋',kx,ky);
+}
+
+// Load from Android shared prefs via JavaScript interface
+function init(){
+  try{
+    const data=JSON.parse(Android.getLocationData());
+    loadPrayers(data.lat,data.lon,data.method);
+  }catch(e){
+    // fallback GPS
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(p=>loadPrayers(p.coords.latitude,p.coords.longitude,4),()=>loadPrayers(21.3891,39.8579,4));
+    }else loadPrayers(21.3891,39.8579,4);
+  }
+}
+init();
+setInterval(()=>renderPrayers&&renderPrayers(),60000);
+</script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="@drawable/widget_bg_small"
+    android:padding="12dp">
+
+    <!-- Bismillah -->
+    <TextView
+        android:id="@+id/widget_small_bismillah"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="بسم الله"
+        android:textColor="#C9A227"
+        android:textSize="9sp"
+        android:fontFamily="serif"
+        android:layout_marginBottom="4dp"/>
+
+    <!-- Time -->
+    <TextView
+        android:id="@+id/widget_small_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="--:--"
+        android:textColor="#F0D060"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:fontFamily="serif"/>
+
+    <!-- Hijri Date -->
+    <TextView
+        android:id="@+id/widget_small_hijri"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="-- هـ"
+        android:textColor="#C9A227"
+        android:textSize="9sp"
+        android:layout_marginTop="2dp"/>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="60dp"
+        android:layout_height="1dp"
+        android:background="#33C9A227"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="6dp"/>
+
+    <!-- Next Prayer -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="2dp">
+
+        <TextView
+            android:id="@+id/widget_small_prayer_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🕌"
+            android:textSize="11sp"/>
+
+        <TextView
+            android:id="@+id/widget_small_prayer_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="الفجر"
+            android:textColor="#E8DCC8"
+            android:textSize="11sp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"/>
+
+        <TextView
+            android:id="@+id/widget_small_prayer_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="--:--"
+            android:textColor="#C9A227"
+            android:textSize="11sp"
+            android:textStyle="bold"/>
+    </LinearLayout>
+
+    <!-- Countdown -->
+    <TextView
+        android:id="@+id/widget_small_countdown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="--:--"
+        android:textColor="#8A8070"
+        android:textSize="9sp"
+        android:layout_marginTop="3dp"/>
+
+</LinearLayout>

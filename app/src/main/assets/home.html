@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>الرئيسية</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--surface2:#1a2235;--border:rgba(180,150,80,0.2);--gold:#c9a227;--gold-light:#f0d060;--gold-dim:rgba(201,162,39,0.15);--teal:#4ecdc4;--text:#e8dcc8;--text-dim:#8a8070;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min-height:100vh;padding:16px;padding-bottom:80px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:18px;margin-bottom:12px;}
+/* Clock */
+.clock-card{background:linear-gradient(135deg,#1a2235,#0f1a2e);text-align:center;padding:28px;}
+.time-big{font-family:'Amiri',serif;font-size:64px;color:var(--gold-light);line-height:1;text-shadow:0 0 30px rgba(201,162,39,0.4);}
+.time-sec{font-size:26px;color:var(--gold);opacity:0.8;}
+.time-ampm{font-size:15px;color:var(--text-dim);margin-top:6px;letter-spacing:3px;}
+/* Info Row */
+.info-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.card-label{font-size:10px;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+.hijri{font-family:'Amiri',serif;font-size:18px;color:var(--gold);}
+.greg{font-size:12px;color:var(--text-dim);margin-top:3px;}
+.temp-big{font-size:44px;font-family:'Amiri',serif;color:var(--teal);line-height:1;}
+.temp-desc{font-size:12px;color:var(--text-dim);margin-top:2px;}
+/* Location */
+.loc-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.loc-name{font-size:20px;font-weight:700;}
+.loc-coords{font-size:11px;color:var(--text-dim);direction:ltr;}
+.search-row{display:flex;gap:8px;}
+.search-input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:8px 12px;color:var(--text);font-family:'Tajawal',sans-serif;font-size:14px;outline:none;}
+.search-input:focus{border-color:var(--gold);}
+.btn{background:var(--gold-dim);border:1px solid var(--gold);border-radius:10px;padding:8px 14px;color:var(--gold);font-size:13px;cursor:pointer;font-family:'Tajawal',sans-serif;}
+.method-row{display:flex;align-items:center;gap:8px;margin-top:10px;}
+.method-label{font-size:11px;color:var(--text-dim);white-space:nowrap;}
+.method-select{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 10px 7px 24px;color:var(--text);font-size:12px;font-family:'Tajawal',sans-serif;outline:none;appearance:none;direction:rtl;}
+/* Country Map */
+#mapWrap{width:100%;height:200px;border-radius:14px;margin-top:10px;border:1px solid var(--border);position:relative;overflow:hidden;background:#0d1526;}
+#countryMap{display:block;width:100%;height:100%;}
+.map-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:13px;}
+</style>
+</head>
+<body>
+
+<div class="card clock-card">
+  <div class="time-big"><span id="h">--</span><span style="opacity:0.4">:</span><span id="m">--</span><span class="time-sec">:<span id="s">--</span></span></div>
+  <div class="time-ampm" id="ap">--</div>
+</div>
+
+<div class="info-row" style="margin-bottom:12px;">
+  <div class="card">
+    <div class="card-label">التاريخ</div>
+    <div class="hijri" id="hijriDate">--</div>
+    <div class="greg" id="gregDate">--</div>
+  </div>
+  <div class="card">
+    <div class="card-label">الطقس</div>
+    <div class="temp-big" id="temp">--°</div>
+    <div class="temp-desc" id="wDesc">--</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="loc-row">
+    <span style="font-size:22px;">📍</span>
+    <div>
+      <div class="loc-name" id="cityName">حدّد موقعك</div>
+      <div class="loc-coords" id="coords">--</div>
+    </div>
+  </div>
+  <div class="search-row">
+    <input class="search-input" id="cityInput" type="text" placeholder="ابحث عن مدينة..."/>
+    <button class="btn" onclick="searchCity()">بحث</button>
+    <button class="btn" onclick="getGPS()">📍</button>
+  </div>
+  <div class="method-row">
+    <span class="method-label">🕌 طريقة الحساب:</span>
+    <select class="method-select" id="methodSel" onchange="onMethodChange()">
+      <option value="4" selected>أم القرى — مكة المكرمة</option>
+      <option value="1">رابطة العالم الإسلامي</option>
+      <option value="5">الهيئة المصرية للمساحة</option>
+      <option value="7">معهد الفقه — كراتشي</option>
+      <option value="8">خليج / قطر</option>
+      <option value="9">كويت</option>
+      <option value="11">سنغافورة / ماليزيا</option>
+      <option value="15">ديانات — تركيا</option>
+      <option value="16">المجلس الإسلامي الأوروبي</option>
+    </select>
+  </div>
+  <div id="mapWrap">
+    <canvas id="countryMap"></canvas>
+    <div class="map-hint" id="mapHint" style="animation:pulse 2s infinite;">جارٍ تحديد الدولة...</div>
+  </div>
+</div>
+
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}</style>
+
+<script>
+const hijriMonths=['محرم','صفر','ربيع الأول','ربيع الآخر','جمادى الأولى','جمادى الآخرة','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'];
+const gregMonths=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const days=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+
+// Clock
+function tick(){
+  const n=new Date();let hr=n.getHours();const mn=n.getMinutes(),sc=n.getSeconds();
+  const ap=hr>=12?'مساءً':'صباحاً';if(hr>12)hr-=12;if(hr===0)hr=12;
+  document.getElementById('h').textContent=String(hr).padStart(2,'0');
+  document.getElementById('m').textContent=String(mn).padStart(2,'0');
+  document.getElementById('s').textContent=String(sc).padStart(2,'0');
+  document.getElementById('ap').textContent=ap;
+}
+setInterval(tick,1000);tick();
+
+// Date
+function toHijri(date){
+  const JD=Math.floor((date.getTime()/86400000)+2440587.5);
+  let l=JD-1948440+10632,n=Math.floor((l-1)/10631);
+  l=l-10631*n+354;
+  let j=Math.floor((10985-l)/5316)*Math.floor((50*l)/17719)+Math.floor(l/5670)*Math.floor((43*l)/15238);
+  l=l-Math.floor((30-j)/15)*Math.floor((17719*j)/50)-Math.floor(j/16)*Math.floor((15238*j)/43)+29;
+  return{day:l-Math.floor(709*Math.floor((24*l)/709)/24),month:Math.floor((24*l)/709),year:30*n+j-30};
+}
+function updateDate(){
+  const n=new Date(),h=toHijri(n);
+  document.getElementById('hijriDate').textContent=`${h.day} ${hijriMonths[h.month-1]} ${h.year} هـ`;
+  document.getElementById('gregDate').textContent=`${days[n.getDay()]}، ${n.getDate()} ${gregMonths[n.getMonth()]} ${n.getFullYear()}`;
+}
+updateDate();
+
+// Location
+let lat=null,lon=null;
+function getGPS(){
+  if(navigator.geolocation){navigator.geolocation.getCurrentPosition(p=>{lat=p.coords.latitude;lon=p.coords.longitude;document.getElementById('coords').textContent=`${lat.toFixed(4)}°، ${lon.toFixed(4)}°`;reverseGeo();fetchWeather();drawMap();},()=>defaultLoc());}else defaultLoc();
+}
+function reverseGeo(){fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=ar`).then(r=>r.json()).then(d=>{document.getElementById('cityName').textContent=d.address.city||d.address.town||d.address.village||'موقعك';Android&&Android.saveLocation(lat,lon,document.getElementById('cityName').textContent,document.getElementById('methodSel').value);}).catch(()=>{});}
+function searchCity(){
+  const q=document.getElementById('cityInput').value.trim();if(!q)return;
+  fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&accept-language=ar`)
+    .then(r=>r.json()).then(d=>{if(d&&d.length>0){lat=parseFloat(d[0].lat);lon=parseFloat(d[0].lon);document.getElementById('cityName').textContent=d[0].display_name.split(',')[0];document.getElementById('coords').textContent=`${lat.toFixed(4)}°، ${lon.toFixed(4)}°`;document.getElementById('cityInput').value='';document.getElementById('mapHint').style.display='flex';fetchWeather();drawMap();try{Android.saveLocation(lat,lon,document.getElementById('cityName').textContent,document.getElementById('methodSel').value);}catch(e){};}else document.getElementById('cityName').textContent='لم يتم العثور عليها';})
+    .catch(()=>{});
+}
+document.getElementById('cityInput').addEventListener('keydown',e=>{if(e.key==='Enter')searchCity();});
+function onMethodChange(){try{Android.saveLocation(lat,lon,document.getElementById('cityName').textContent,document.getElementById('methodSel').value);}catch(e){}}
+function defaultLoc(){lat=21.3891;lon=39.8579;document.getElementById('cityName').textContent='جدة';document.getElementById('coords').textContent='21.3891°، 39.8579°';fetchWeather();drawMap();}
+
+// Weather
+function fetchWeather(){
+  if(!lat)return;
+  fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&timezone=auto`)
+    .then(r=>r.json()).then(d=>{document.getElementById('temp').textContent=`${Math.round(d.current.temperature_2m)}°`;document.getElementById('wDesc').textContent=wDesc(d.current.weathercode);})
+    .catch(()=>{});
+}
+function wDesc(c){if(c===0)return'☀️ صافٍ';if(c<=3)return'⛅ غائم جزئياً';if(c<=49)return'🌫️ ضبابي';if(c<=59)return'🌦️ رذاذ';if(c<=69)return'🌧️ أمطار';if(c<=79)return'❄️ ثلوج';if(c<=99)return'⛈️ عاصفة';return'🌡️ متغير';}
+
+// Country Map
+async function drawMap(){
+  if(!lat||!lon)return;
+  const wrap=document.getElementById('mapWrap');
+  const cvs=document.getElementById('countryMap');
+  const hint=document.getElementById('mapHint');
+  const W=wrap.clientWidth,H=wrap.clientHeight;
+  cvs.width=W*devicePixelRatio;cvs.height=H*devicePixelRatio;
+  cvs.style.width=W+'px';cvs.style.height=H+'px';
+  const mc=cvs.getContext('2d');mc.scale(devicePixelRatio,devicePixelRatio);
+  mc.fillStyle='#0d1526';mc.fillRect(0,0,W,H);
+  try{
+    const r=await fetch(`https://nominatim.openstreetmap.org/search?country_codes=${await getCC()}&format=geojson&polygon_geojson=1&limit=1`);
+    const geo=await r.json();
+    if(geo.features&&geo.features.length>0){
+      hint.style.display='none';
+      renderGeo(mc,W,H,geo.features[0].geometry,lat,lon);
+    }else{renderFallback(mc,W,H);}
+  }catch(e){renderFallback(mc,W,H);}
+}
+async function getCC(){
+  const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+  const d=await r.json();return d.address.country_code;
+}
+function renderGeo(mc,W,H,geo,pLat,pLon){
+  let all=[];
+  function collect(g){if(g.type==='Polygon')g.coordinates.forEach(r=>r.forEach(c=>all.push(c)));else if(g.type==='MultiPolygon')g.coordinates.forEach(p=>p.forEach(r=>r.forEach(c=>all.push(c))));}
+  collect(geo);
+  if(!all.length){renderFallback(mc,W,H);return;}
+  let mnX=Infinity,mxX=-Infinity,mnY=Infinity,mxY=-Infinity;
+  all.forEach(([x,y])=>{mnX=Math.min(mnX,x);mxX=Math.max(mxX,x);mnY=Math.min(mnY,y);mxY=Math.max(mxY,y);});
+  const pad=22,sc=Math.min((W-pad*2)/(mxX-mnX),(H-pad*2)/(mxY-mnY));
+  const ox=pad+((W-pad*2)-(mxX-mnX)*sc)/2,oy=pad+((H-pad*2)-(mxY-mnY)*sc)/2;
+  function proj(x,y){return[ox+(x-mnX)*sc,H-oy-(y-mnY)*sc];}
+  function draw(g,fill,stroke){
+    if(g.type==='Polygon')g.coordinates.forEach(ring=>{mc.beginPath();ring.forEach(([x,y],i)=>{const[px,py]=proj(x,y);i===0?mc.moveTo(px,py):mc.lineTo(px,py);});mc.closePath();if(fill){mc.fillStyle=fill;mc.fill();}if(stroke){mc.strokeStyle=stroke;mc.lineWidth=1.2;mc.stroke();}});
+    else if(g.type==='MultiPolygon')g.coordinates.forEach(p=>p.forEach(ring=>{mc.beginPath();ring.forEach(([x,y],i)=>{const[px,py]=proj(x,y);i===0?mc.moveTo(px,py):mc.lineTo(px,py);});mc.closePath();if(fill){mc.fillStyle=fill;mc.fill();}if(stroke){mc.strokeStyle=stroke;mc.lineWidth=1.2;mc.stroke();}}));
+  }
+  // subtle grid
+  mc.strokeStyle='rgba(78,120,180,0.04)';mc.lineWidth=0.5;
+  for(let i=0;i<8;i++){mc.beginPath();mc.moveTo(0,H*i/8);mc.lineTo(W,H*i/8);mc.stroke();mc.beginPath();mc.moveTo(W*i/8,0);mc.lineTo(W*i/8,H);mc.stroke();}
+  draw(geo,'rgba(28,48,78,0.95)','rgba(201,162,39,0.65)');
+  // PIN
+  const[px,py]=proj(pLon,pLat);
+  mc.beginPath();mc.arc(px,py,12,0,Math.PI*2);mc.fillStyle='rgba(201,162,39,0.12)';mc.fill();
+  mc.beginPath();mc.arc(px,py,6,0,Math.PI*2);mc.fillStyle='rgba(201,162,39,0.25)';mc.fill();
+  mc.beginPath();mc.arc(px,py,4,0,Math.PI*2);mc.fillStyle='#f0d060';mc.fill();
+  mc.strokeStyle='rgba(255,255,255,0.9)';mc.lineWidth=1;mc.stroke();
+  mc.beginPath();mc.moveTo(px,py-4);mc.lineTo(px,py-16);mc.strokeStyle='rgba(240,208,96,0.8)';mc.lineWidth=1.5;mc.stroke();
+  mc.beginPath();mc.arc(px,py-20,5,0,Math.PI*2);mc.fillStyle='#c9a227';mc.fill();
+  mc.strokeStyle='#f0d060';mc.lineWidth=1;mc.stroke();
+}
+function renderFallback(mc,W,H){mc.fillStyle='#0d1526';mc.fillRect(0,0,W,H);document.getElementById('mapHint').style.display='none';}
+
+// Init
+getGPS();
+</script>
+</body>
+</html>

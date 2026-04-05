@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/ic_home"
+        android:title="الرئيسية" />
+
+    <item
+        android:id="@+id/nav_prayer"
+        android:icon="@drawable/ic_prayer"
+        android:title="الصلاة" />
+
+    <item
+        android:id="@+id/nav_cosmos"
+        android:icon="@drawable/ic_moon"
+        android:title="الشمس والقمر" />
+
+    <item
+        android:id="@+id/nav_events"
+        android:icon="@drawable/ic_star"
+        android:title="الظواهر" />
+
+    <item
+        android:id="@+id/nav_converter"
+        android:icon="@drawable/ic_calendar"
+        android:title="التاريخ" />
+
+</menu>

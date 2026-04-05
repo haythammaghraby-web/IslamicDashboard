@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">لوحة إسلامية</string>
+    <string name="tab_home">الرئيسية</string>
+    <string name="tab_prayer">الصلاة</string>
+    <string name="tab_cosmos">الشمس والقمر</string>
+    <string name="tab_events">الظواهر</string>
+    <string name="tab_converter">التاريخ</string>
+    <!-- Widgets -->
+    <string name="widget_small_name">إسلامي — صغير 🕐</string>
+    <string name="widget_small_desc">وقت + تاريخ هجري + صلاة تالية</string>
+    <string name="widget_medium_name">إسلامي — متوسط 🕌</string>
+    <string name="widget_medium_desc">وقت + تاريخ + طقس + مواقيت الصلاة</string>
+    <string name="widget_large_name">إسلامي — كبير 🌙</string>
+    <string name="widget_large_desc">لوحة كاملة: وقت + صلاة + قمر + طقس</string>
+</resources>

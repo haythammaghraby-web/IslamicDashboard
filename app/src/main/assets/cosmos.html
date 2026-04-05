@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>الشمس والقمر</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--surface2:#1a2235;--border:rgba(180,150,80,0.2);--gold:#c9a227;--gold-light:#f0d060;--gold-dim:rgba(201,162,39,0.15);--teal:#4ecdc4;--text:#e8dcc8;--text-dim:#8a8070;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min-height:100vh;padding:16px;padding-bottom:80px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:18px;margin-bottom:12px;}
+.sec-title{font-family:'Amiri',serif;font-size:20px;color:var(--gold);text-align:center;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.sec-title::before,.sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.sub-label{font-size:11px;color:var(--text-dim);text-align:center;margin-bottom:6px;letter-spacing:1px;}
+/* Sun arc */
+.sun-arc{height:90px;position:relative;margin-bottom:8px;}
+.sun-arc svg{width:100%;height:100%;}
+/* Info grid */
+.info-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px;}
+.ig-item{background:var(--surface2);border-radius:12px;padding:12px;text-align:center;}
+.ig-icon{font-size:24px;margin-bottom:4px;}
+.ig-label{font-size:10px;color:var(--text-dim);margin-bottom:3px;}
+.ig-val{font-size:13px;font-weight:600;}
+/* Moon arc */
+.moon-arc{position:relative;height:130px;}
+.moon-arc canvas{display:block;width:100%;height:100%;}
+.moon-info{text-align:center;margin-top:8px;}
+.moon-phase-name{font-family:'Amiri',serif;font-size:18px;color:var(--gold);}
+.moon-phase-sub{font-size:11px;color:var(--text-dim);margin-top:3px;}
+/* Eclipse */
+.eclipse-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.ecl-item{background:var(--surface2);border-radius:14px;padding:14px;text-align:center;}
+.ecl-badge{display:inline-block;font-size:9px;padding:2px 8px;border-radius:6px;font-weight:700;margin-bottom:8px;}
+.badge-sol{background:rgba(201,162,39,0.2);border:1px solid var(--gold);color:var(--gold);}
+.badge-lun{background:rgba(78,205,196,0.15);border:1px solid var(--teal);color:var(--teal);}
+.ecl-icon{font-size:30px;margin-bottom:6px;}
+.ecl-type{font-family:'Amiri',serif;font-size:15px;}
+.ecl-date{font-size:12px;color:var(--gold-light);margin-top:4px;}
+.ecl-hijri{font-size:10px;color:var(--text-dim);margin-top:2px;}
+.ecl-days{font-family:'Amiri',serif;font-size:22px;margin:6px 0 2px;}
+.ecl-days-label{font-size:10px;color:var(--text-dim);}
+</style>
+</head>
+<body>
+
+<!-- Sun Card -->
+<div class="card">
+  <div class="sec-title">الشمس</div>
+  <div class="sub-label">☀️ مسار الشمس اليوم</div>
+  <div class="sun-arc">
+    <svg viewBox="0 0 300 85">
+      <defs>
+        <linearGradient id="ag" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#1a2235"/>
+          <stop offset="50%" stop-color="rgba(201,162,39,0.35)"/>
+          <stop offset="100%" stop-color="#1a2235"/>
+        </linearGradient>
+      </defs>
+      <path d="M 20 78 Q 150 12 280 78" stroke="url(#ag)" stroke-width="2" fill="none" stroke-dasharray="4 3"/>
+      <line x1="10" y1="78" x2="290" y2="78" stroke="rgba(180,150,80,0.12)" stroke-width="1"/>
+      <circle id="sunDot" cx="150" cy="45" r="9" fill="#c9a227">
+        <animate attributeName="opacity" values="0.7;1;0.7" dur="3s" repeatCount="indefinite"/>
+      </circle>
+      <g id="rays" transform="translate(150,45)" opacity="0.4">
+        <line x1="0" y1="-14" x2="0" y2="-18" stroke="#f0d060" stroke-width="1.5"/>
+        <line x1="14" y1="0" x2="18" y2="0" stroke="#f0d060" stroke-width="1.5"/>
+        <line x1="0" y1="14" x2="0" y2="18" stroke="#f0d060" stroke-width="1.5"/>
+        <line x1="-14" y1="0" x2="-18" y2="0" stroke="#f0d060" stroke-width="1.5"/>
+        <line x1="10" y1="-10" x2="13" y2="-13" stroke="#f0d060" stroke-width="1.5"/>
+        <line x1="10" y1="10" x2="13" y2="13" stroke="#f0d060" stroke-width="1.5"/>
+        <line x1="-10" y1="-10" x2="-13" y2="-13" stroke="#f0d060" stroke-width="1.5"/>
+        <line x1="-10" y1="10" x2="-13" y2="13" stroke="#f0d060" stroke-width="1.5"/>
+      </g>
+      <text x="12" y="76" fill="rgba(200,180,120,0.5)" font-size="9" font-family="Tajawal">الشروق</text>
+      <text x="252" y="76" fill="rgba(200,180,120,0.5)" font-size="9" font-family="Tajawal">الغروب</text>
+    </svg>
+  </div>
+  <div class="info-grid">
+    <div class="ig-item"><div class="ig-icon">🌅</div><div class="ig-label">الشروق</div><div class="ig-val" id="rise">--:--</div></div>
+    <div class="ig-item"><div class="ig-icon">☀️</div><div class="ig-label">النهار</div><div class="ig-val" id="daylen">--</div></div>
+    <div class="ig-item"><div class="ig-icon">🌇</div><div class="ig-label">الغروب</div><div class="ig-val" id="set">--:--</div></div>
+  </div>
+</div>
+
+<!-- Moon Arc -->
+<div class="card">
+  <div class="sec-title">القمر</div>
+  <div class="sub-label">🌙 أطوار القمر الشهرية</div>
+  <div class="moon-arc"><canvas id="moonArc"></canvas></div>
+  <div class="moon-info">
+    <div class="moon-phase-name" id="moonName">--</div>
+    <div class="moon-phase-sub" id="moonSub">--</div>
+  </div>
+</div>
+
+<!-- Eclipse -->
+<div class="card">
+  <div class="sec-title">الكسوف والخسوف القادم</div>
+  <div class="eclipse-grid" id="eclGrid">
+    <div style="grid-column:1/-1;text-align:center;color:var(--text-dim);padding:16px;animation:pulse 2s infinite;">جارٍ الحساب...</div>
+  </div>
+</div>
+
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}</style>
+
+<script>
+const hijriMonths=['محرم','صفر','ربيع الأول','ربيع الآخر','جمادى الأولى','جمادى الآخرة','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'];
+const gregMonths=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+
+// Hijri
+function toHijri(d){const JD=Math.floor((d.getTime()/86400000)+2440587.5);let l=JD-1948440+10632,n=Math.floor((l-1)/10631);l=l-10631*n+354;let j=Math.floor((10985-l)/5316)*Math.floor((50*l)/17719)+Math.floor(l/5670)*Math.floor((43*l)/15238);l=l-Math.floor((30-j)/15)*Math.floor((17719*j)/50)-Math.floor(j/16)*Math.floor((15238*j)/43)+29;return{day:l-Math.floor(709*Math.floor((24*l)/709)/24),month:Math.floor((24*l)/709),year:30*n+j-30};}
+
+// Sun arc from prayer times
+function loadSun(lat,lon,method){
+  const n=new Date();
+  fetch(`https://api.aladhan.com/v1/timings/${n.getDate()}-${n.getMonth()+1}-${n.getFullYear()}?latitude=${lat}&longitude=${lon}&method=${method||4}`)
+    .then(r=>r.json()).then(d=>{
+      const t=d.data.timings;
+      const rise=t.Sunrise, sunset=t.Sunset;
+      document.getElementById('rise').textContent=rise;
+      document.getElementById('set').textContent=sunset;
+      const[rH,rM]=rise.split(':').map(Number),[sH,sM]=sunset.split(':').map(Number);
+      const rMin=rH*60+rM,sMin=sH*60+sM,diff=sMin-rMin;
+      document.getElementById('daylen').textContent=`${Math.floor(diff/60)}:${String(diff%60).padStart(2,'0')}`;
+      const nowMin=n.getHours()*60+n.getMinutes();
+      let p=(nowMin-rMin)/(sMin-rMin);p=Math.max(0,Math.min(1,p));
+      const t0={x:20,y:78},cp={x:150,y:12},t1={x:280,y:78};
+      const bx=(1-p)*(1-p)*t0.x+2*(1-p)*p*cp.x+p*p*t1.x,by=(1-p)*(1-p)*t0.y+2*(1-p)*p*cp.y+p*p*t1.y;
+      document.getElementById('sunDot').setAttribute('cx',bx);document.getElementById('sunDot').setAttribute('cy',by);
+      document.getElementById('rays').setAttribute('transform',`translate(${bx},${by})`);
+    }).catch(()=>{});
+}
+
+// Moon phase
+function getMoonData(){
+  const now=new Date(),kNew=new Date(2024,0,11);
+  const diff=(now-kNew)/(1000*60*60*24),cycle=29.53059;
+  const phase=((diff%cycle)+cycle)%cycle,pct=phase/cycle;
+  let name;
+  if(pct<0.03||pct>0.97)name='المحاق';
+  else if(pct<0.22)name='الهلال المتزايد';
+  else if(pct<0.28)name='التربيع الأول';
+  else if(pct<0.47)name='الأحدب المتزايد';
+  else if(pct<0.53)name='البدر';
+  else if(pct<0.72)name='الأحدب المتناقص';
+  else if(pct<0.78)name='التربيع الأخير';
+  else name='الهلال المتناقص';
+  return{pct,name,day:Math.round(phase)};
+}
+
+// Draw moon arc canvas
+function drawMoonArc(){
+  const cvs=document.getElementById('moonArc');
+  const par=cvs.parentElement;
+  const W=par.clientWidth,H=130;
+  cvs.width=W*devicePixelRatio;cvs.height=H*devicePixelRatio;
+  cvs.style.width=W+'px';cvs.style.height=H+'px';
+  const mc=cvs.getContext('2d');mc.scale(devicePixelRatio,devicePixelRatio);
+  const{pct}=getMoonData();
+  const sx=30,sy=18,ex=W-30,ey=18,cpx=W/2,cpy=H-14;
+  // Arc line
+  mc.beginPath();mc.moveTo(sx,sy);mc.quadraticCurveTo(cpx,cpy,ex,ey);
+  mc.strokeStyle='rgba(140,150,200,0.35)';mc.lineWidth=1.5;mc.setLineDash([4,3]);mc.stroke();mc.setLineDash([]);
+  // Horizon
+  mc.beginPath();mc.moveTo(0,sy);mc.lineTo(W,sy);
+  mc.strokeStyle='rgba(180,150,80,0.2)';mc.lineWidth=1;mc.stroke();
+  // Phases
+  const phases=[0.01,0.125,0.25,0.375,0.5,0.625,0.75,0.875,0.99];
+  const labels=['محاق','هلال','تربيع١','أحدب','بدر','أحدب','تربيع٢','هلال','محاق'];
+  function bpt(t){const bx=(1-t)*(1-t)*sx+2*(1-t)*t*cpx+t*t*ex,by=(1-t)*(1-t)*sy+2*(1-t)*t*cpy+t*t*ey;return{x:bx,y:by};}
+  // Arrows
+  for(let i=0;i<phases.length-1;i++){
+    const p0=bpt(phases[i]),p1=bpt(phases[i+1]);
+    const mx=(p0.x+p1.x)/2,my=(p0.y+p1.y)/2;
+    const ang=Math.atan2(p1.y-p0.y,p1.x-p0.x);
+    mc.save();mc.translate(mx,my);mc.rotate(ang);
+    mc.beginPath();mc.moveTo(-4,-3);mc.lineTo(4,0);mc.lineTo(-4,3);
+    mc.strokeStyle='rgba(150,140,100,0.4)';mc.lineWidth=1;mc.stroke();
+    mc.restore();
+  }
+  phases.forEach((ph,i)=>{
+    const pt=bpt(ph);
+    const isActive=Math.abs(pct-ph)<0.07||(ph>0.95&&(pct<0.05||pct>0.95));
+    const R=isActive?15:9;
+    drawDisc(mc,pt.x,pt.y,R,ph,isActive);
+    mc.font=isActive?'bold 9px Tajawal':'8px Tajawal';
+    mc.fillStyle=isActive?'#f0d060':'rgba(180,160,100,0.6)';
+    mc.textAlign='center';
+    const ly=pt.y<H/2?pt.y-R-7:pt.y+R+12;
+    mc.fillText(labels[i],pt.x,ly);
+    if(isActive){mc.beginPath();mc.arc(pt.x,pt.y,R+5,0,Math.PI*2);mc.strokeStyle='rgba(240,208,96,0.5)';mc.lineWidth=1.5;mc.stroke();}
+  });
+  // Exact marker
+  const cp2=bpt(pct);mc.beginPath();mc.arc(cp2.x,cp2.y,3,0,Math.PI*2);mc.fillStyle='rgba(240,208,96,0.9)';mc.fill();
+}
+
+function drawDisc(mc,cx,cy,R,ph,bright){
+  mc.beginPath();mc.arc(cx,cy,R,0,Math.PI*2);mc.fillStyle=bright?'#1a2a40':'#141e30';mc.fill();
+  mc.strokeStyle=bright?'rgba(201,162,39,0.6)':'rgba(100,100,140,0.3)';mc.lineWidth=bright?1.2:0.8;mc.stroke();
+  const ill=ph<=0.5?ph*2:(1-ph)*2,wax=ph<0.5;
+  if(ill<0.02)return;
+  mc.save();mc.beginPath();mc.arc(cx,cy,R,0,Math.PI*2);mc.clip();
+  mc.beginPath();mc.arc(cx,cy,R,0,Math.PI*2);mc.fillStyle=bright?'#d4a843':'rgba(180,140,50,0.85)';mc.fill();
+  mc.beginPath();
+  if(wax){if(ill<=0.5){const ex=R*(1-2*ill);mc.moveTo(cx,cy-R);mc.arc(cx,cy,R,-Math.PI/2,Math.PI/2,false);mc.ellipse(cx,cy,Math.max(0.3,ex),R,0,Math.PI/2,-Math.PI/2,true);mc.closePath();}else{const ex=R*(2*ill-1);mc.moveTo(cx,cy-R);mc.arc(cx,cy,R,-Math.PI/2,Math.PI/2,true);mc.ellipse(cx,cy,Math.max(0.3,ex),R,0,-Math.PI/2,Math.PI/2,false);mc.closePath();}}
+  else{if(ill<=0.5){const ex=R*(1-2*ill);mc.moveTo(cx,cy-R);mc.arc(cx,cy,R,-Math.PI/2,Math.PI/2,true);mc.ellipse(cx,cy,Math.max(0.3,ex),R,0,Math.PI/2,-Math.PI/2,false);mc.closePath();}else{const ex=R*(2*ill-1);mc.moveTo(cx,cy-R);mc.arc(cx,cy,R,-Math.PI/2,Math.PI/2,false);mc.ellipse(cx,cy,Math.max(0.3,ex),R,0,Math.PI/2,-Math.PI/2,true);mc.closePath();}}
+  mc.fillStyle=bright?'#1a2a40':'#141e30';mc.fill();mc.restore();
+}
+
+// Eclipse calculator
+function jdFromDate(y,m,d){if(m<=2){y--;m+=12;}const A=Math.floor(y/100);return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+2-A+Math.floor(A/4)-1524.5;}
+function dateFromJD(jd){const z=Math.floor(jd+0.5),f=(jd+0.5)-z;let a=z<2299161?z:(()=>{const aa=Math.floor((z-1867216.25)/36524.25);return z+1+aa-Math.floor(aa/4);})();const b=a+1524,c=Math.floor((b-122.1)/365.25),d=Math.floor(365.25*c),e=Math.floor((b-d)/30.6001);const day=b-d-Math.floor(30.6001*e)+f,month=e<14?e-1:e-13,year=month>2?c-4716:c-4715;return{year,month,day:Math.floor(day)};}
+function findEclipse(from,lunar){
+  const k0=(from.getFullYear()+(from.getMonth()+1)/12-2000)*12.3685;
+  let k=lunar?Math.ceil(k0-0.5)+0.5:Math.ceil(k0);
+  const jd0=jdFromDate(from.getFullYear(),from.getMonth()+1,from.getDate());
+  for(let a=0;a<60;a++,k++){
+    const T=k/1236.85,T2=T*T,T3=T2*T,T4=T3*T;
+    const JDE=2451550.09766+29.530588861*k+0.00015437*T2-0.000000150*T3+0.00000000073*T4;
+    if(JDE<jd0)continue;
+    const M=(2.5534+29.10535670*k-0.0000014*T2)*Math.PI/180;
+    const Mp=(201.5643+385.81693528*k+0.0107582*T2)*Math.PI/180;
+    const F=(160.7108+390.67050284*k-0.0016118*T2)*Math.PI/180;
+    if(Math.abs(Math.sin(F))>0.36)continue;
+    const gamma=0.9680*Math.sin(F);
+    const ag=Math.abs(gamma);
+    let type;
+    if(lunar){if(ag<0.9972)type='كلي';else if(ag<1.026)type='جزئي';else if(ag<1.557)type='شبه ظل';else continue;}
+    else{const u=0.0059+0.0046*Math.cos(M)-0.0182*Math.cos(Mp);if(ag<0.9972)type=u<0?'كلي':u>0.0047?'حلقي':'هجين';else if(ag<1.026)type='جزئي';else continue;}
+    return{jd:JDE,date:dateFromJD(JDE),type};
+  }return null;
+}
+
+function renderEclipses(){
+  const now=new Date();
+  const sol=findEclipse(now,false),lun=findEclipse(now,true);
+  const jdNow=jdFromDate(now.getFullYear(),now.getMonth()+1,now.getDate());
+  function card(e,icon,badge,badgeCls){
+    if(!e)return`<div class="ecl-item"><div style="color:var(--text-dim);font-size:12px;padding:10px;">لا توجد بيانات</div></div>`;
+    const d=new Date(e.date.year,e.date.month-1,e.date.day);
+    const h=toHijri(d);const days=Math.round(e.jd-jdNow);
+    return`<div class="ecl-item">
+      <div class="ecl-badge ${badgeCls}">${badge}</div>
+      <div class="ecl-icon">${icon}</div>
+      <div class="ecl-type">${e.type}</div>
+      <div class="ecl-date">📅 ${e.date.day} ${gregMonths[e.date.month-1]} ${e.date.year}</div>
+      <div class="ecl-hijri">${h.day} ${hijriMonths[h.month-1]} ${h.year} هـ</div>
+      <div class="ecl-days" style="color:${badgeCls.includes('sol')?'var(--gold)':'var(--teal)'}">${days}</div>
+      <div class="ecl-days-label">يوماً متبقياً</div>
+    </div>`;
+  }
+  document.getElementById('eclGrid').innerHTML=card(sol,'☀️','كسوف الشمس','badge-sol')+card(lun,'🌕','خسوف القمر','badge-lun');
+}
+
+function init(){
+  const m=getMoonData();
+  document.getElementById('moonName').textContent=m.name;
+  document.getElementById('moonSub').textContent=`اليوم ${m.day} من الشهر القمري (29.5 يوم)`;
+  drawMoonArc();
+  renderEclipses();
+  try{const data=JSON.parse(Android.getLocationData());loadSun(data.lat,data.lon,data.method);}
+  catch(e){if(navigator.geolocation)navigator.geolocation.getCurrentPosition(p=>loadSun(p.coords.latitude,p.coords.longitude,4),()=>loadSun(21.3891,39.8579,4));else loadSun(21.3891,39.8579,4);}
+}
+window.addEventListener('load',init);
+window.addEventListener('resize',drawMoonArc);
+</script>
+</body>
+</html>

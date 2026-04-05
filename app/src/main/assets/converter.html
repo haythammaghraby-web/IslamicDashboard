@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>تحويل التاريخ</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--surface2:#1a2235;--border:rgba(180,150,80,0.2);--gold:#c9a227;--gold-light:#f0d060;--gold-dim:rgba(201,162,39,0.15);--teal:#4ecdc4;--text:#e8dcc8;--text-dim:#8a8070;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min-height:100vh;padding:16px;padding-bottom:80px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:20px;margin-bottom:14px;}
+.sec-title{font-family:'Amiri',serif;font-size:20px;color:var(--gold);text-align:center;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+.sec-title::before,.sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.tabs{display:flex;background:var(--bg);border-radius:12px;padding:4px;gap:4px;margin-bottom:16px;}
+.tab{flex:1;padding:10px;text-align:center;border-radius:9px;font-size:13px;cursor:pointer;color:var(--text-dim);border:none;background:transparent;font-family:'Tajawal',sans-serif;transition:all 0.2s;}
+.tab.active{background:var(--gold-dim);color:var(--gold);border:1px solid var(--border);}
+.form{display:none;flex-direction:column;gap:10px;}
+.form.active{display:flex;}
+.input-row{display:flex;gap:8px;align-items:center;}
+.ci{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-size:16px;font-family:'Tajawal',sans-serif;outline:none;text-align:center;}
+.ci:focus{border-color:var(--gold);}
+.sep{color:var(--text-dim);font-size:18px;}
+.conv-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--gold),#a07820);border:none;border-radius:12px;color:#0a0f1a;font-family:'Amiri',serif;font-size:18px;font-weight:700;cursor:pointer;}
+.result{background:var(--surface2);border-radius:12px;padding:16px;text-align:center;font-family:'Amiri',serif;font-size:20px;color:var(--gold-light);min-height:56px;display:flex;align-items:center;justify-content:center;line-height:1.4;}
+/* Today card */
+.today-card{background:linear-gradient(135deg,#1a2235,#0f1a2e);border:1px solid var(--border);border-radius:20px;padding:20px;text-align:center;margin-bottom:14px;}
+.today-hijri{font-family:'Amiri',serif;font-size:26px;color:var(--gold);margin-bottom:6px;}
+.today-greg{font-size:14px;color:var(--text-dim);}
+.today-label{font-size:10px;color:var(--text-dim);letter-spacing:2px;margin-bottom:8px;}
+/* Hijri months reference */
+.months-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.month-item{background:var(--surface2);border-radius:10px;padding:10px;display:flex;align-items:center;gap:8px;}
+.month-num{font-family:'Amiri',serif;font-size:18px;color:var(--gold);width:28px;text-align:center;}
+.month-name{font-size:13px;}
+.month-name small{display:block;font-size:10px;color:var(--text-dim);}
+</style>
+</head>
+<body>
+
+<!-- Today -->
+<div class="today-card">
+  <div class="today-label">تاريخ اليوم</div>
+  <div class="today-hijri" id="todayH">--</div>
+  <div class="today-greg" id="todayG">--</div>
+</div>
+
+<!-- Converter -->
+<div class="card">
+  <div class="sec-title">تحويل التاريخ</div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('htg',this)">هجري ← ميلادي</button>
+    <button class="tab" onclick="switchTab('gth',this)">ميلادي ← هجري</button>
+  </div>
+
+  <!-- H→G -->
+  <div class="form active" id="form-htg">
+    <div class="input-row">
+      <input class="ci" id="h-d" type="number" placeholder="اليوم" min="1" max="30"/>
+      <span class="sep">/</span>
+      <input class="ci" id="h-m" type="number" placeholder="الشهر" min="1" max="12"/>
+      <span class="sep">/</span>
+      <input class="ci" id="h-y" type="number" placeholder="السنة" value="1446"/>
+    </div>
+    <button class="conv-btn" onclick="hToG()">تحويل ←</button>
+    <div class="result" id="res-htg">أدخل التاريخ الهجري</div>
+  </div>
+
+  <!-- G→H -->
+  <div class="form" id="form-gth">
+    <div class="input-row">
+      <input class="ci" id="g-d" type="number" placeholder="اليوم" min="1" max="31"/>
+      <span class="sep">/</span>
+      <input class="ci" id="g-m" type="number" placeholder="الشهر" min="1" max="12"/>
+      <span class="sep">/</span>
+      <input class="ci" id="g-y" type="number" placeholder="السنة" value="2026"/>
+    </div>
+    <button class="conv-btn" onclick="gToH()">تحويل ←</button>
+    <div class="result" id="res-gth">أدخل التاريخ الميلادي</div>
+  </div>
+</div>
+
+<!-- Hijri Months Reference -->
+<div class="card">
+  <div class="sec-title">الأشهر الهجرية</div>
+  <div class="months-grid" id="monthsGrid"></div>
+</div>
+
+<script>
+const hijriMonths=['محرم','صفر','ربيع الأول','ربيع الآخر','جمادى الأولى','جمادى الآخرة','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'];
+const hijriMonthsEn=['Muharram','Safar','Rabi al-Awwal','Rabi al-Thani','Jumada al-Awwal','Jumada al-Thani','Rajab','Sha\'ban','Ramadan','Shawwal','Dhu al-Qi\'dah','Dhu al-Hijjah'];
+const gregMonths=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const daysAr=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+
+function toHijri(date){
+  const JD=Math.floor((date.getTime()/86400000)+2440587.5);
+  let l=JD-1948440+10632,n=Math.floor((l-1)/10631);
+  l=l-10631*n+354;
+  let j=Math.floor((10985-l)/5316)*Math.floor((50*l)/17719)+Math.floor(l/5670)*Math.floor((43*l)/15238);
+  l=l-Math.floor((30-j)/15)*Math.floor((17719*j)/50)-Math.floor(j/16)*Math.floor((15238*j)/43)+29;
+  return{day:l-Math.floor(709*Math.floor((24*l)/709)/24),month:Math.floor((24*l)/709),year:30*n+j-30};
+}
+function fromHijri(hd,hm,hy){
+  const JD=hd+Math.ceil(29.5001*(hm-1))+(hy-1)*354+Math.floor((3+11*hy)/30)+1948440-385;
+  const jd=JD+0.5,z=Math.floor(jd);
+  let a=z<2299161?z:(()=>{const al=Math.floor((z-1867216.25)/36524.25);return z+1+al-Math.floor(al/4);})();
+  const b=a+1524,c=Math.floor((b-122.1)/365.25),d=Math.floor(365.25*c),e=Math.floor((b-d)/30.6001);
+  const day=b-d-Math.floor(30.6001*e),month=e<14?e-1:e-13,year=month>2?c-4716:c-4715;
+  return{day,month,year};
+}
+
+// Today display
+function showToday(){
+  const n=new Date(),h=toHijri(n);
+  document.getElementById('todayH').textContent=`${h.day} ${hijriMonths[h.month-1]} ${h.year} هـ`;
+  document.getElementById('todayG').textContent=`${daysAr[n.getDay()]}، ${n.getDate()} ${gregMonths[n.getMonth()]} ${n.getFullYear()} م`;
+}
+showToday();
+
+// Months grid
+function buildMonths(){
+  let html='';
+  hijriMonths.forEach((m,i)=>{html+=`<div class="month-item"><div class="month-num">${i+1}</div><div class="month-name">${m}<small>${hijriMonthsEn[i]}</small></div></div>`;});
+  document.getElementById('monthsGrid').innerHTML=html;
+}
+buildMonths();
+
+// Tab switch
+function switchTab(tab,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');
+  document.getElementById('form-htg').classList.toggle('active',tab==='htg');
+  document.getElementById('form-gth').classList.toggle('active',tab==='gth');
+}
+
+// Convert H→G
+function hToG(){
+  const d=parseInt(document.getElementById('h-d').value),m=parseInt(document.getElementById('h-m').value),y=parseInt(document.getElementById('h-y').value);
+  if(!d||!m||!y){document.getElementById('res-htg').textContent='أدخل تاريخاً صحيحاً';return;}
+  try{
+    const g=fromHijri(d,m,y);
+    const gDate=new Date(g.year,g.month-1,g.day);
+    document.getElementById('res-htg').textContent=`${daysAr[gDate.getDay()]}\n${g.day} ${gregMonths[g.month-1]} ${g.year} م`;
+  }catch{document.getElementById('res-htg').textContent='تاريخ غير صالح';}
+}
+
+// Convert G→H
+function gToH(){
+  const d=parseInt(document.getElementById('g-d').value),m=parseInt(document.getElementById('g-m').value),y=parseInt(document.getElementById('g-y').value);
+  if(!d||!m||!y){document.getElementById('res-gth').textContent='أدخل تاريخاً صحيحاً';return;}
+  const h=toHijri(new Date(y,m-1,d));
+  document.getElementById('res-gth').textContent=`${h.day} ${hijriMonths[h.month-1]} ${h.year} هـ`;
+}
+</script>
+</body>
+</html>
